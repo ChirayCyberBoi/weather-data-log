@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Data Log</title>
+
+    <style>
+
+body{
+    font-family: Arial;
+    padding:20px;
+    background:#f2f2f2;
+}
+
+h1{
+    color:#333;
+}
+
+input{
+    padding:10px;
+    margin:5px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    padding:10px 15px;
+    margin:5px;
+    border:none;
+    background:#007bff;
+    color:white;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse: collapse;
+    background:white;
+}
+
+th{
+    background:#007bff;
+    color:white;
+}
+
+table, th, td{
+    border:1px solid #ccc;
+}
+
+th, td{
+    padding:12px;
+    text-align:center;
+}
+
+</style>
+
+</head>
+<body>
+
+    <h1>Weather Data Log</h1>
+
+    <input type="text" id="city" placeholder="City">
+
+    <input type="text" id="temp" placeholder="Temperature">
+
+    <input type="text" id="humidity" placeholder="Humidity">
+
+    <input type="text" id="weather" placeholder="Weather Condition">
+
+    <button onclick="addData()">Save</button>
+
+<input type="text" id="search" placeholder="Search City">
+
+<button onclick="searchData()">Search</button>
+
+<table border="1" id="weatherTable">
+
+        <tr>
+            <th>City</th>
+            <th>Temperature</th>
+            <th>Humidity</th>
+            <th>Weather</th>
+            <th>Action</th>
+        </tr>
+
+    </table>
+
+    <script>
+
+let weatherData = JSON.parse(localStorage.getItem("weatherData")) || [];
+
+displayData();
+
+function addData(){
+
+    let city = document.getElementById("city").value;
+
+    let temp = document.getElementById("temp").value;
+
+    let humidity = document.getElementById("humidity").value;
+
+    let weather = document.getElementById("weather").value;
+
+    let data = {
+        city: city,
+        temp: temp,
+        humidity: humidity,
+        weather: weather
+    };
+
+    weatherData.push(data);
+
+    localStorage.setItem("weatherData",
+    JSON.stringify(weatherData));
+
+    displayData();
+
+}
+
+function displayData(){
+
+    let table = document.getElementById("weatherTable");
+
+    table.innerHTML = `
+        <tr>
+            <th>City</th>
+            <th>Temperature</th>
+            <th>Humidity</th>
+            <th>Weather</th>
+            <th>Action</th>
+        </tr>
+    `;
+
+    weatherData.forEach(function(data, index){
+
+        let row = table.insertRow();
+
+        row.insertCell(0).innerHTML = data.city;
+        row.insertCell(1).innerHTML = data.temp;
+        row.insertCell(2).innerHTML = data.humidity;
+        row.insertCell(3).innerHTML = data.weather;
+
+        row.insertCell(4).innerHTML =
+        '<button onclick="deleteData(' + index + ')">Delete</button>';
+
+    });
+
+}
+
+function searchData(){
+
+    let search = document.getElementById("search").value.toLowerCase();
+
+    let filteredData = weatherData.filter(function(data){
+
+        return data.city.toLowerCase().includes(search);
+
+    });
+
+    let table = document.getElementById("weatherTable");
+
+    table.innerHTML = `
+        <tr>
+            <th>City</th>
+            <th>Temperature</th>
+            <th>Humidity</th>
+            <th>Weather</th>
+            <th>Action</th>
+        </tr>
+    `;
+
+    filteredData.forEach(function(data, index){
+
+        let row = table.insertRow();
+
+        row.insertCell(0).innerHTML = data.city;
+        row.insertCell(1).innerHTML = data.temp;
+        row.insertCell(2).innerHTML = data.humidity;
+        row.insertCell(3).innerHTML = data.weather;
+
+        row.insertCell(4).innerHTML =
+        '<button onclick="deleteData(' + index + ')">Delete</button>';
+
+    });
+
+}
+
+function deleteData(index){
+
+    weatherData.splice(index, 1);
+
+    localStorage.setItem("weatherData",
+    JSON.stringify(weatherData));
+
+    displayData();
+
+}
+
+</script>
+
+</body>
+</html>
