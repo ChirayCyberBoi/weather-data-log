@@ -63,7 +63,8 @@ button{
     padding:12px 18px;
     margin:10px 5px;
     border:none;
-    background:#007bff;
+    background:#00bfff;
+    box-shadow:0 0 10px #00bfff;
     color:white;
     border-radius:10px;
     cursor:pointer;
@@ -74,6 +75,7 @@ button{
 button:hover{
     background:#0056b3;
     transform:scale(1.05);
+    box-shadow:0 0 20px #00bfff;
 }
 
 table{
@@ -111,11 +113,67 @@ table, th, td{
 .search-box{
     margin-top:20px;
 }
+#darkModeToggle{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:black;
+    color:white;
+    padding:12px 18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    z-index:1000;
+}
 
+body{
+    transition:0.4s;
+}
+
+body.dark{
+    background: linear-gradient(-45deg, #4facfe, #00f2fe, #43e97b, #38f9d7);
+background-size: 400% 400%;
+animation: gradient 10s ease infinite;
+    color:white;
+}
+
+body.dark table{
+    background:#1e1e1e;
+    color:white;
+}
+
+body.dark tr:nth-child(even){
+    background:#2a2a2a;
+}
+
+body.dark input{
+    background:#2a2a2a;
+    color:white;
+}
+@keyframes gradient{
+    0%{
+        background-position:0% 50%;
+    }
+    50%{
+        background-position:100% 50%;
+    }
+    100%{
+        background-position:0% 50%;
+    }
+}
+table{
+    transition:0.3s;
+}
+
+table:hover{
+    transform:scale(1.01);
+    box-shadow:0 0 25px rgba(0,0,0,0.3);
+}
 </style>
 </head>
 </div>
 <body>
+    <button id="darkModeToggle">🌙 Dark Mode</button>
     <div class="container"></div>
 
     <div class="hero">
@@ -153,10 +211,33 @@ table, th, td{
         </tr>
 
     </table>
+    <div id="cityModal" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 0 20px rgba(0,0,0,0.3);
+z-index:2000;
+min-width:300px;
+">
+
+<h2 id="modalCity"></h2>
+
+<p id="modalTemp"></p>
+<p id="modalHumidity"></p>
+<p id="modalWeather"></p>
+
+<button onclick="closeModal()">Close</button>
+</div>
 
     <script>
 
 let weatherData = JSON.parse(localStorage.getItem("weatherData")) || [];
+let editIndex = -1;
 
 displayData();
 
@@ -177,7 +258,13 @@ function addData(){
         weather: weather
     };
 
+    if(editIndex === -1){
     weatherData.push(data);
+}
+else{
+    weatherData[editIndex] = data;
+    editIndex = -1;
+}
 
     localStorage.setItem("weatherData",
     JSON.stringify(weatherData));
@@ -204,7 +291,8 @@ function displayData(){
 
         let row = table.insertRow();
 
-        row.insertCell(0).innerHTML = data.city;
+       row.insertCell(0).innerHTML =
+'<button onclick="viewCity(' + index + ')">' + data.city + '</button>';
         row.insertCell(1).innerHTML = data.temp;
         row.insertCell(2).innerHTML = data.humidity;
        let weatherEmoji = "";
@@ -228,8 +316,8 @@ else{
 row.insertCell(3).innerHTML = weatherEmoji;
 
         row.insertCell(4).innerHTML =
+        '<button onclick="editData(' + index + ')">Update</button> ' +
         '<button onclick="deleteData(' + index + ')">Delete</button>';
-
     });
 
 }
@@ -260,7 +348,8 @@ function searchData(){
 
         let row = table.insertRow();
 
-        row.insertCell(0).innerHTML = data.city;
+        row.insertCell(0).innerHTML =
+'<button onclick="viewCity(' + index + ')">' + data.city + '</button>';
         row.insertCell(1).innerHTML = data.temp;
         row.insertCell(2).innerHTML = data.humidity;
         let weatherEmoji = "";
@@ -284,9 +373,45 @@ else{
 row.insertCell(3).innerHTML = weatherEmoji;
 
         row.insertCell(4).innerHTML =
+        '<button onclick="editData(' + index + ')">Update</button> ' +
         '<button onclick="deleteData(' + index + ')">Delete</button>';
-
     });
+
+}
+function editData(index){
+
+    let data = weatherData[index];
+
+    document.getElementById("city").value = data.city;
+    document.getElementById("temp").value = data.temp;
+    document.getElementById("humidity").value = data.humidity;
+    document.getElementById("weather").value = data.weather;
+
+    editIndex = index;
+}
+function viewCity(index){
+
+    let data = weatherData[index];
+
+    document.getElementById("cityModal").style.display = "block";
+
+    document.getElementById("modalCity").innerHTML =
+    "📍 " + data.city;
+
+    document.getElementById("modalTemp").innerHTML =
+    "🌡️ Temperature: " + data.temp;
+
+    document.getElementById("modalHumidity").innerHTML =
+    "💧 Humidity: " + data.humidity;
+
+    document.getElementById("modalWeather").innerHTML =
+    "☁️ Weather: " + data.weather;
+
+}
+
+function closeModal(){
+
+    document.getElementById("cityModal").style.display = "none";
 
 }
 
@@ -298,8 +423,17 @@ function deleteData(index){
     JSON.stringify(weatherData));
 
     displayData();
-
+    
 }
+const darkModeToggle =
+document.getElementById("darkModeToggle");
+
+darkModeToggle.addEventListener("click", function(){
+
+    document.body.classList.toggle("dark");
+
+});
+
 
 </script>
 
